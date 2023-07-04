@@ -14,7 +14,7 @@ from urllib.parse import parse_qs
 import re
 from enum import Enum
 import math 
-import BufferWriter
+from BufferWriter import BufferWriter
 
 # bounding_box = [
 #     (37.412437,8.649578),
@@ -202,7 +202,7 @@ driver.get("https://www.monster.fr/")
 wait = WebDriverWait(driver, 10)
 driver.fullscreen_window()
 init(driver)
-search_with_keyword(driver,keywords=[".net"],base_loc = (44.554271,1.102653))
+search_with_keyword(driver,keywords=[".net"],geo = (44.554271,1.102653))
 # search_with_keyword(driver)
 
 

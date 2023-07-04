@@ -7,7 +7,7 @@ class BufferWriter:
     base_name : str = None
     append : bool = True
     counter = 0
-    def __init__(self,max_buffer_size : int,base_name) -> None:
+    def __init__(self,base_name: str,max_buffer_size : int) -> None:
         self.data = []
         if(max_buffer_size != None):
             self.max_buffer_size = 200*1024*1024
