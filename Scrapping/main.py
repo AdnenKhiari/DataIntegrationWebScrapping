@@ -16,11 +16,13 @@ import pandas as pd
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 import re
+import signal
 from enum import Enum
 import math 
 from BufferWriter import BufferWriter
 from loguru import logger
 import atexit
+import threading
 
 # bounding_box = [
 #     (37.412437,8.649578),
@@ -202,9 +204,17 @@ def search_with_keyword(driver: WebDriver,keywords = None,geo : tuple = None,rd:
 # a=[]
 # generate_locations(rd=100,locations=a,base_loc = (44.554271,1.102653))
 # print(a)
+
+def close_all(pool):
+    def wrapper():
+        pool.shutdown(cancel_futures=True)
+    return wrapper
+
 def main():
     # wait = WebDriverWait(driver, 10)
-    # search_with_keyword(None,geo=[48.773388,-2.430871])    
+    # search_with_keyword(None,geo=[48.773388,-2.430871])  
+    
+    #Init params  
     base_loc = [48.443388,2.230871]
     keywords = [".net","bi","angular","react","data science"]
     logger.info(f"Using all localisation inside of the bounding box from the base {base_loc}")
@@ -213,26 +223,20 @@ def main():
     generate_locations(rd=100,base_loc=base_loc,locations=localisations)
     logger.success(f"FINISHED COMPUTING LOCALISATIONS INSIDE THE BOUNDING BOX, FOUND {len(localisations)} , Result : {localisations} ")
     
+    #Init threads
     thread_num = os.cpu_count()
-    pool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_num,thread_name_prefix="scrapper")
-    atexit.register(_python_exit_wrapper(pool._work_queue))
+    pool = concurrent.futures.ProcessPoolExecutor(max_workers=thread_num)
 
-    
+    #Distribute Work
     chunk_size = min(len(localisations),len(localisations) // thread_num)
+    futures = []
     for key in keywords:
         for chunk_start in np.arange(0,len(localisations),chunk_size):
-            pool.submit(search_with_keyword,driver=None,keywords=[key] if key != "" else None,geo=localisations[chunk_start:chunk_start+chunk_size])
-    pool.shutdown(wait=True)
+            futures.append(pool.submit(search_with_keyword,driver=None,keywords=[key] if key != "" else None,geo=localisations[chunk_start:chunk_start+chunk_size]))
+    atexit.register(close_all(pool))
+    pool.join()
+    # search_with_keyword(None,keywords=None,geo=[base_loc])
 
-
-def _python_exit_wrapper(_threads_queues):
-    def wrapper():
-        items = list(_threads_queues.items())
-        for t, q in items:
-            q.put(None)
-        for t, q in items:
-            t.join()
-    return wrapper
 
 if __name__ == "__main__":
     logger.add("./logs/main_{time}.log",    
