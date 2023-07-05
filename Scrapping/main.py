@@ -54,7 +54,7 @@ def translate_latlong(lat,long,lat_translation_meters,long_translation_meters):
 
 def generate_tunisian_locations(rd: float,base_loc = None,locations : list = None):
     if(base_loc == None):
-        base_loc = (36.8318827,102328137)
+        base_loc = (36.8318827,10.2328137)
     if(base_loc[0] < bounding_box[3][0] or base_loc[0] > bounding_box[1][0]):
         return
     if(base_loc[1] < bounding_box[0][1] or base_loc[1] > bounding_box[1][1]):
@@ -96,14 +96,13 @@ def init(driver: ChromiumDriver):
         accept_cookies.click()
     except:
         print("No need for cookies")
-def extract_result_set(driver: ChromiumDriver,rd: float = 100) -> list:
+def extract_result_set(rows : BufferWriter,driver: ChromiumDriver,rd: float = 100) -> list:
     print(driver.current_url)
     get_with_params = changeLocalisation(driver,driver.current_url,rd=rd)
     print(get_with_params)
     driver.get(get_with_params)
     # sleep(100)
     driver.fullscreen_window()
-    rows = []
     current_count = 0
     while True:
         card_x = '//section//ul//li[position() > '+str(current_count)+' ]//article'
@@ -129,11 +128,12 @@ def extract_result_set(driver: ChromiumDriver,rd: float = 100) -> list:
                 **extractHeaderDetails(header_details),
                 **extractJobDetails(job_details),
                 'scrap_timestamp':pd.Timestamp.now()}
-            rows.append(data)
+            rows.add(data)
+        rows.writeIfNeeded()
 
-    print(len(rows))
-    print("--------------")
-    print(rows)
+    # print(len(rows))
+    # print("--------------")
+    # print(rows)
     return rows
 def extractHeaderDetails(node: WebElement) -> dict:
     poste=node.find_element(By.TAG_NAME,'h2').text
@@ -148,7 +148,7 @@ def extractJobDetails(node: WebElement) -> dict:
 
     # print([tuple(map(lambda d: d.text,item.find_elements(By.XPATH,'text()')))  for item in node])
     dc= dict([process_text(item)  for item in node])
-    print(dc)
+    # print(dc)
     return dc
 def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = None,rd: float = 100,base_loc : tuple = None):
     localisations = []
@@ -156,9 +156,9 @@ def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = Non
         generate_tunisian_locations(rd=100,base_loc=base_loc,locations=localisations)
     else:
         localisations = [geo]
-    result = []
     if(keywords != None):
         for key in keywords:
+            result = BufferWriter(base_name=key,max_buffer_size=None,folder_path="./output")
             for local in localisations:
                 # driver.get('chrome://settings/clearBrowserData')
                 # driver.find_element(By.XPATH,'//settings-ui').send_keys(Keys.ENTER)
@@ -171,12 +171,10 @@ def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = Non
                 search_keyword_input = driver.find_element(By.XPATH,'html/body//div[contains(@class,ds-search-bar)]//form/div[1]/div[1]//input')
                 search_keyword_input.send_keys(key)
                 search_keyword_input.send_keys(Keys.ENTER)
-                result = result + extract_result_set(driver,rd)
-            if(len(result) > 0):
-                df = pd.DataFrame(result)
-                df.to_csv(key+".csv")
-                result = []
+                extract_result_set(result,driver,rd)
+            result.writeToDisk()
     else:
+            result = BufferWriter("all_results",max_buffer_size=None,folder_path="./output")
             for local in localisations:
                 driver.close()
                 driver = create_driver()
@@ -186,11 +184,8 @@ def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = Non
                 driver.implicitly_wait(1)
                 search_keyword_input = driver.find_element(By.XPATH,'html/body//div[contains(@class,ds-search-bar)]//form/div[1]/div[1]//input')
                 search_keyword_input.send_keys(Keys.ENTER)
-                result += extract_result_set(driver)    
-            if(len(result) > 0):
-                df = pd.DataFrame(result)
-                df.to_csv("all.csv")
-                result = []
+                extract_result_set(result,driver,rd)
+            result.writeToDisk()
         
     #TODO : transform the rows array to a generator that rpdocues fixed data that we can iterate through yield and save to data frames
     #TODO : added logging
@@ -202,7 +197,5 @@ driver.get("https://www.monster.fr/")
 wait = WebDriverWait(driver, 10)
 driver.fullscreen_window()
 init(driver)
-search_with_keyword(driver,keywords=[".net"],geo = (44.554271,1.102653))
+search_with_keyword(driver,geo=[48.773388,-2.430871])
 # search_with_keyword(driver)
-
-
