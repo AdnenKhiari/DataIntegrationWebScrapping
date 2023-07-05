@@ -3,14 +3,17 @@ services:
   chrome:
     image: selenium/node-chrome:4.1.4-20220427
     shm_size: 1gb
+    deploy:
+      replicas: 2      
     depends_on:
       - selenium-hub
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=2
       - SE_NODE_MAX_INSTANCES=2
-  #      - SE_NODE_SESSION_TIMEOUT=180
+      - SE_NODE_SESSION_TIMEOUT=15
 
   selenium-hub:
     image: selenium/hub:4.1.4-20220427

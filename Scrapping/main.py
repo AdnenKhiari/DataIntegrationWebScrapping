@@ -1,12 +1,15 @@
-from selenium.webdriver.chrome.webdriver import ChromiumDriver
+from selenium.webdriver import ChromeOptions
 from time import sleep
-from datetime import time
+import json
+import os
+import concurrent.futures
+import numpy as np
 from selenium import webdriver
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.timeouts import Timeouts
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
@@ -17,7 +20,7 @@ from enum import Enum
 import math 
 from BufferWriter import BufferWriter
 from loguru import logger
-import signal
+import atexit
 
 # bounding_box = [
 #     (37.412437,8.649578),
@@ -25,15 +28,32 @@ import signal
 #     (32.813536,11.397994),
 #     (32.813536,8.649578)
 # ]
+# bounding_box = [
+#     (89,-150),
+#     (89,179),
+#     (-30,179),
+#     (-30,-150)
+# ]
 bounding_box = [
-    (89,-150),
-    (89,179),
-    (-30,179),
-    (-30,-150)
+    (50,-20),
+    (50,20),
+    (-0,20),
+    (-0,-20)
 ]
-def create_driver() -> ChromiumDriver:
-    logger.debug("RECREATING CHROME DRIVER")
-    return webdriver.Chrome()
+def send_commande(driver : WebDriver , cmd :str, params : dict ={}):
+  resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
+  url = driver.command_executor._url + resource
+  body = json.dumps({'cmd': cmd, 'params': params})
+  response = driver.command_executor._request('POST', url, body)
+  return response.get('value')
+
+
+def create_driver() -> WebDriver:
+    logger.debug("CREATING CHROME DRIVER")
+    options = ChromeOptions()
+    options.add_argument('--no-sandbox')
+    return webdriver.Remote(command_executor="http://localhost:4444/wd/hub",
+        options=options)
 def translate_latlong(lat,long,lat_translation_meters,long_translation_meters):
     ''' method to move any lat,long point by provided meters in lat and long direction.
     params :
@@ -54,7 +74,7 @@ def translate_latlong(lat,long,lat_translation_meters,long_translation_meters):
     long_new = long + (long_translation_meters * m_long) / math.cos(lat * (math.pi / 180));
     
     return lat_new,long_new
-def generate_tunisian_locations(rd: float,base_loc = None,locations : list = None):
+def generate_locations(rd: float,base_loc = None,locations : list = None):
     if(base_loc == None):
         base_loc = (36.8318827,10.2328137)
     if(base_loc[0] < bounding_box[3][0] or base_loc[0] > bounding_box[1][0]):
@@ -71,21 +91,21 @@ def generate_tunisian_locations(rd: float,base_loc = None,locations : list = Non
             if abs(new_loc[0]-old_loc[0]) + abs(new_loc[1]-old_loc[1]) < 1:
                 found=True
         if(found == False):
-            generate_tunisian_locations(rd,new_loc,locations)
+            generate_locations(rd,new_loc,locations)
 class DATE_FILTER(Enum):
     today = 'today'
     last_2_days= 'last 2 days'
     last_week = 'last week'
     last_2_weeks = 'last 2 weeks'
     last_month = 'last month'
-def changeLocalisation(driver: ChromiumDriver,url = 'https://www.example.com/some_path?&rd=some_value&adnene',rd: int = 100,latestDate: DATE_FILTER = None) -> str:       
+def changeLocalisation(driver: WebDriver,url = 'https://www.example.com/some_path?&rd=some_value&adnene',rd: int = 100,latestDate: DATE_FILTER = None) -> str:       
     tokens = url.split("&")
     if(rd != None):
         tokens.append("rd="+str(rd))
     if(latestDate != None):
         tokens.append("recency="+str(latestDate))   
     return "&".join(tokens)
-def init(driver: ChromiumDriver):
+def init(driver: WebDriver):
     driver.get("https://www.monster.fr/")
     try:
         cookie_path = "html/body//div[@id='onetrust-banner-sdk']//button[@id='onetrust-accept-btn-handler']"
@@ -95,7 +115,7 @@ def init(driver: ChromiumDriver):
     except:
         logger.debug("No need for cookies")
     logger.debug("Init completed")
-def extract_result_set(rows : BufferWriter,driver: ChromiumDriver,rd: float = 100) -> list:
+def extract_result_set(rows : BufferWriter,driver: WebDriver,rd: float = 100) -> list:
     get_with_params = changeLocalisation(driver,driver.current_url,rd=rd)
     logger.info(f"Working on result set on current URL {get_with_params}")
     driver.get(get_with_params)
@@ -151,16 +171,9 @@ def extractJobDetails(node: WebElement) -> dict:
     dc= dict([process_text(item)  for item in node])
     # print(dc)
     return dc
-def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = None,rd: float = 100,base_loc : tuple = None):
-    localisations = []
-    if(geo == None):
-        logger.info(f"Using all localisation inside of the bounding box from the base {base_loc}")
-        logger.debug("COMPUTING LOCALISATIONS INSIDE THE BOUNDING BOX")
-        generate_tunisian_locations(rd=100,base_loc=base_loc,locations=localisations)
-        logger.success(f"FINISHED COMPUTING LOCALISATIONS INSIDE THE BOUNDING BOX, FOUND {len(localisations)} , Result : {localisations} ")
-    else:
-        logger.info(f"Using only one localisation {geo}")
-        localisations = [geo]
+def search_with_keyword(driver: WebDriver,keywords = None,geo : tuple = None,rd: float = 100,base_loc : tuple = None):
+    localisations = geo
+    logger.info(f"Searching In {localisations}")
     if(keywords == None):
         keywords = [""]
     for positionKeyword,key in enumerate(keywords):
@@ -171,10 +184,11 @@ def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = Non
             logger.info(f"Searching for area {local}")
             # driver.get('chrome://settings/clearBrowserData')
             # driver.find_element(By.XPATH,'//settings-ui').send_keys(Keys.ENTER)
-            driver.close()
+            if(driver != None):
+                driver.close()
             driver = create_driver()
             init(driver)
-            driver.execute_cdp_cmd("Emulation.setGeolocationOverride",{'latitude':local[0],'longitude':local[1],'accuracy':1})
+            send_commande(driver,"Emulation.setGeolocationOverride",{'latitude':local[0],'longitude':local[1],'accuracy':1})
             driver.get("https://www.monster.fr/")
             driver.implicitly_wait(1)
             search_keyword_input = driver.find_element(By.XPATH,'html/body//div[contains(@class,ds-search-bar)]//form/div[1]/div[1]//input')
@@ -184,13 +198,42 @@ def search_with_keyword(driver: ChromiumDriver,keywords = None,geo : tuple = Non
             logger.success(f"Finished working on localisation {local} , Current : {position+1} / {len(localisations)}")
         result.writeToDisk()
         logger.success(f"Finished working on {keyname} ,  Current : {positionKeyword+1} / {len(keywords)}")
+    logger.info(f"Finished Scrapping keywords {keywords} with locations :{localisations}")
 # a=[]
-# generate_tunisian_locations(rd=100,locations=a,base_loc = (44.554271,1.102653))
+# generate_locations(rd=100,locations=a,base_loc = (44.554271,1.102653))
 # print(a)
 def main():
-    driver = create_driver()
     # wait = WebDriverWait(driver, 10)
-    search_with_keyword(driver,base_loc=[48.773388,-2.430871])
+    # search_with_keyword(None,geo=[48.773388,-2.430871])    
+    base_loc = [48.443388,2.230871]
+    keywords = [".net","bi","angular","react","data science"]
+    logger.info(f"Using all localisation inside of the bounding box from the base {base_loc}")
+    logger.debug("COMPUTING LOCALISATIONS INSIDE THE BOUNDING BOX")
+    localisations = []
+    generate_locations(rd=100,base_loc=base_loc,locations=localisations)
+    logger.success(f"FINISHED COMPUTING LOCALISATIONS INSIDE THE BOUNDING BOX, FOUND {len(localisations)} , Result : {localisations} ")
+    
+    thread_num = os.cpu_count()
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_num,thread_name_prefix="scrapper")
+    atexit.register(_python_exit_wrapper(pool._work_queue))
+
+    
+    chunk_size = min(len(localisations),len(localisations) // thread_num)
+    for key in keywords:
+        for chunk_start in np.arange(0,len(localisations),chunk_size):
+            pool.submit(search_with_keyword,driver=None,keywords=[key] if key != "" else None,geo=localisations[chunk_start:chunk_start+chunk_size])
+    pool.shutdown(wait=True)
+
+
+def _python_exit_wrapper(_threads_queues):
+    def wrapper():
+        items = list(_threads_queues.items())
+        for t, q in items:
+            q.put(None)
+        for t, q in items:
+            t.join()
+    return wrapper
+
 if __name__ == "__main__":
     logger.add("./logs/main_{time}.log",    
     enqueue=True,
