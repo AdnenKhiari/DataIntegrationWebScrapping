@@ -49,7 +49,7 @@ with DAG(
 
     hello_work_scrap_data = DockerOperator(
         task_id="hello_work_scrap_data",
-        image="localhost:5000/hello_work_scrap:1.0",
+        image="localhost:5000/hello_work_scrap:1.1",
         container_name="hello_work_scrap_data",
         mounts=[Mount(source="/home/adnen/Documents/Stage Wimbee/datasets/hello_work",target="/app/output_hello_work",type="bind")],
         command="python HelloWork/main.py --keywords=azure --ds={{prev_execution_date_success}} --thread-num=2",
@@ -72,7 +72,7 @@ with DAG(
         **shared_args,
         port_bindings={9777:9988},
         command="python main.py --thread-num=1",
-        environment={"DB_HOST":ods_conn.host,"HUB_HOSTNAME":"172.17.0.1","RUN_ID": run_id,"DB_PASSWORD":ods_conn}
+        environment={"DB_HOST":ods_conn.host,"HUB_HOSTNAME":"172.17.0.1","RUN_ID": run_id,"DB_PASSWORD":ods_conn.password}
     )
     ods_hw_load_data = get_talend_job("ods_hw_load_data",[Mount(source="/home/adnen/Documents/Stage Wimbee/datasets/hello_work",target="/datasets/hello_work",type="bind")   ])
     ods_hw_preprocess_data = get_talend_job("ods_hw_preprocess_data")

@@ -68,9 +68,9 @@ CREATE TABLE ods.dbo.company_financials (
 	id BIGINT NOT NULL IDENTITY(1,1)  PRIMARY KEY,
 	siren VARCHAR(15) NOT NULL,
 	date_cloture VARCHAR(20) NOT NULL,
-	excedant_brut_exploitation VARCHAR(10),
-	marge_brut VARCHAR(10),
-	chiffre_affaire VARCHAR(10),
-	resultat_net VARCHAR(10),
+	excedant_brut_exploitation VARCHAR(20),
+	marge_brut VARCHAR(20),
+	chiffre_affaire VARCHAR(20),
+	resultat_net VARCHAR(20),
 	insertion_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 )

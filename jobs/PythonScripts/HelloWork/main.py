@@ -126,20 +126,21 @@ def init(driver: WebDriver,code: str,key: str,checkPagination = True):
     return (start,end)
 
 def extract_detail(driver: WebDriver,item_job: WebElement,rows: BufferWriter,keyword: str,local: str):
-    details_tab_x = "//section[contains(@class,'campagne centered')]"
-    description_path = "//main/section[1]/section[(@data-job-description) and not(contains(@class,'retrait'))]"
-    resume = "//main/section[1]/section[(@data-job-description) and (contains(@class,'retrait'))]"
+    driver.set_window_size(650,800)
+    details_tab_x = "/html/body/main/div[4]/div[3]/div/div[2]/div/section"
+    description_path = "/html/body/main/div[4]/div[3]/div/div[1]/div/section"
+    resume = "/html/body/main/div[4]/div[3]/div/div[2]/div/section/*[position()>3]"
     WebDriverWait(driver,30).until(EC.presence_of_element_located((By.XPATH,details_tab_x)))
     header_details = driver.find_element(By.XPATH,details_tab_x)
     job_free_text=driver.find_elements(By.XPATH,description_path)
-    resume=driver.find_element(By.XPATH,resume)
-    job_id = driver.find_elements(By.XPATH,"//section[@data-offerid]")[0].get_attribute("data-offerid")
+    resume= '\n'.join(["En résumé..."]+list(filter(lambda f: len(f) > 0,map(lambda d: d.text,driver.find_elements(By.XPATH,resume)))))
+    job_id = driver.current_url.split("/")[-1].replace(".html","")
     data={
         "key": keyword,
         "country": local,
         "job_id": job_id,
         **extractHeaderDetails(header_details),
-        "resume": resume.text,
+        "resume": resume,
         "societe_recherche": job_free_text[0].text,
         "profile_demande": np.nan,
         'scrap_timestamp':pd.Timestamp.now()
@@ -147,6 +148,7 @@ def extract_detail(driver: WebDriver,item_job: WebElement,rows: BufferWriter,key
     if(len(job_free_text) > 1):
         data["profile_demande"] =job_free_text[1].text
 
+    driver.fullscreen_window()
     logger.debug(f"Extracted Job Detail : {job_id}")
     rows.add(data)
 
@@ -199,12 +201,14 @@ def extract_result_set(index: int,keyword : str,local : str,start: int = 100,end
     # print(rows)
     return rows
 def extractHeaderDetails(node: WebElement) -> dict:
-    poste_nom=node.find_element(By.XPATH,'.//h1/span').text
-    entreprise=node.find_element(By.TAG_NAME,'h1').text.replace(poste_nom,"")
-
-    localisation=node.find_element(By.XPATH,'.//ul/li[1]').text
-    contract=node.find_element(By.XPATH,'.//ul/li[2]').text
-    sal=node.find_elements(By.XPATH,'.//ul/li[3]')
+    poste_nom=node.find_element(By.XPATH,'./span[1]').text
+    entreprise=node.find_element(By.XPATH,'./div[1]').text.replace(poste_nom,"")
+    localisation=node.find_element(By.XPATH,'./ul[1]/li[1]').text
+    contract=node.find_element(By.XPATH,'./ul[1]/li[2]').text
+    contract_supp = node.find_elements(By.XPATH,"./ul[2]//li[not(contains(@class,'tw-tag-attractive'))]")
+    if(len(contract_supp) > 0):
+        contract += " - " + contract_supp[0].text
+    sal=node.find_elements(By.XPATH,'.//li[contains(@class,"tw-tag-attractive")]')
 
     dicts= {'poste':poste_nom,'entreprise':entreprise,'localisation':localisation,"contract":contract}
     if(len(sal)>0):

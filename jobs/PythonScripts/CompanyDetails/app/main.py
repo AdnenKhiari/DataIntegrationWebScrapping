@@ -62,10 +62,11 @@ def informations_of_the_job(liste_of_all_societies):
     result2 = []
     for society in liste_of_all_societies : 
         driver.get("https://annuaire-entreprises.data.gouv.fr")
-
-        search_field = driver.find_element(By.XPATH ,'//div[@id="search-input--lg"]//input' )
+        sb = '//div[@id="search-input--lg"]//input'
+        WebDriverWait(driver,20).until(EC.presence_of_element_located((By.XPATH,sb)))
+        search_field = driver.find_element(By.XPATH ,sb )
         search_field.send_keys(society)
-        search_field.send_keys(Keys.ENTER)
+        driver.find_element(By.XPATH ,sb ).send_keys(Keys.ENTER)
 
         with job_scrap_histogram.labels(threading.currentThread().ident,run_id).time():
 
