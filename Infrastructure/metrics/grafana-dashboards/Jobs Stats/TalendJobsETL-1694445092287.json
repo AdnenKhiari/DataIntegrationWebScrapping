@@ -1,0 +1,1421 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_ETL_JOBS LOGS",
+      "label": "ETL Jobs Logs",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "elasticsearch",
+      "pluginName": "Elasticsearch"
+    },
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "elasticsearch",
+      "name": "Elasticsearch",
+      "version": "1.0.0"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.2"
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "state-timeline",
+      "name": "State timeline",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "${DS_ETL_JOBS LOGS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "dag.id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "airflow.loglevel"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run.id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 109
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job.loglevel"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 97
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job.thread_id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 108
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job.p.module"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 128
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "task.exec_date"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 181
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "job.talend_job"
+          }
+        ]
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${DS_ETL_JOBS LOGS}"
+          },
+          "metrics": [
+            {
+              "id": "1",
+              "type": "logs"
+            }
+          ],
+          "query": "job.talend_job : *",
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Logs",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "@timestamp": true,
+              "@version": true,
+              "_id": true,
+              "_index": true,
+              "_source": true,
+              "_type": true,
+              "agent.ephemeral_id": true,
+              "agent.id": true,
+              "agent.name": true,
+              "agent.type": true,
+              "agent.version": true,
+              "dag.id": true,
+              "dag.script_source": true,
+              "data_stream.dataset": true,
+              "data_stream.namespace": true,
+              "data_stream.type": true,
+              "ecs.version": true,
+              "event.original": true,
+              "highlight": true,
+              "host.name": true,
+              "input.type": true,
+              "job.datetime": true,
+              "job.p.func": true,
+              "job.p.linenum": true,
+              "job.p.module": false,
+              "log.file.path": true,
+              "log.flags": true,
+              "log.offset": true,
+              "sort": true,
+              "tags": true,
+              "task.id": true
+            },
+            "indexByName": {
+              "@timestamp": 1,
+              "@version": 2,
+              "_id": 3,
+              "_index": 4,
+              "_source": 5,
+              "_type": 6,
+              "agent.ephemeral_id": 7,
+              "agent.id": 8,
+              "agent.name": 9,
+              "agent.type": 10,
+              "agent.version": 11,
+              "airflow.loglevel": 15,
+              "dag.id": 12,
+              "dag.script_source": 13,
+              "data_stream.dataset": 16,
+              "data_stream.namespace": 17,
+              "data_stream.type": 18,
+              "ecs.version": 19,
+              "event.original": 20,
+              "highlight": 21,
+              "host.name": 23,
+              "input.type": 24,
+              "job.datetime": 25,
+              "job.loglevel": 26,
+              "job.p.func": 27,
+              "job.p.linenum": 28,
+              "job.p.module": 29,
+              "job.thread_id": 30,
+              "log.file.path": 31,
+              "log.flags": 32,
+              "log.offset": 33,
+              "log_msg": 34,
+              "run.id": 14,
+              "sort": 35,
+              "tags": 36,
+              "task.exec_date": 0,
+              "task.id": 22
+            },
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "task.exec_date"
+              }
+            ]
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "time",
+                "targetField": "task.exec_date"
+              },
+              {
+                "destinationType": "enum",
+                "targetField": "airflow.loglevel"
+              },
+              {
+                "destinationType": "enum",
+                "targetField": "job.loglevel"
+              },
+              {}
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 11,
+      "panels": [],
+      "repeat": "job_instance",
+      "repeatDirection": "h",
+      "title": "$job_instance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "failure": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Failed"
+                },
+                "success": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "Success"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 15
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "/.*/",
+          "values": true
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "work_time_total{instance=~\"$job_instance\", component!~\"t.*\", run_id=\"$run_id\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{instance}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Status : $job_instance",
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "Time",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "__name__",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "context",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "instance",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "job",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "prog",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "project",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "time",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "version",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "pid",
+                "handlerKey": "field.name"
+              },
+              {
+                "fieldName": "status",
+                "handlerKey": "field.value"
+              }
+            ]
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 5,
+        "y": 15
+      },
+      "id": 13,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "sum by(label) (rows_total{job=\"some_talend_job\", instance=~\"$job_instance\", run_id=\"$run_id\", label!=\"source\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "range": false,
+          "refId": "others"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "max by(label) (rows_total{job=\"some_talend_job\", instance=~\"$job_instance\", run_id=\"$run_id\", label=\"source\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "source",
+          "range": false,
+          "refId": "source"
+        }
+      ],
+      "title": "Rows Stats",
+      "transformations": [
+        {
+          "id": "joinByLabels",
+          "options": {
+            "value": "label"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "total modified",
+            "binary": {
+              "left": "insert",
+              "operator": "+",
+              "reducer": "sum",
+              "right": "update "
+            },
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "insert",
+                "update"
+              ],
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Void Rows",
+            "binary": {
+              "left": "source",
+              "operator": "-",
+              "reducer": "sum",
+              "right": "total modified"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "source": true,
+              "total modified": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "failure": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "x"
+                },
+                "success": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "✓"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 12,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "mergeValues": false,
+        "rowHeight": 0.9,
+        "showValue": "always",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "work_time_total{instance=\"$job_instance\", component!~\"t.*\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "values"
+        }
+      ],
+      "title": "Status Timeline",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "context": true,
+              "instance": true,
+              "job": true,
+              "pid": true,
+              "prog": true,
+              "project": true,
+              "run_id": true,
+              "status": false,
+              "time": false,
+              "version": true
+            },
+            "indexByName": {
+              "Time": 1,
+              "Value": 12,
+              "__name__": 2,
+              "context": 3,
+              "instance": 4,
+              "job": 5,
+              "pid": 6,
+              "prog": 7,
+              "project": 8,
+              "run_id": 10,
+              "status": 9,
+              "time": 0,
+              "version": 11
+            },
+            "renameByName": {
+              "status": ""
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "string",
+                "targetField": "status"
+              },
+              {
+                "destinationType": "time",
+                "targetField": "time"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 56,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 2,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "id": 8,
+      "options": {
+        "barRadius": 0.15,
+        "barWidth": 0.95,
+        "colorByField": "status",
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xField": "run_id",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "work_time_total{instance=\"$job_instance\", component!~\"t.*\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "values"
+        }
+      ],
+      "title": "Historical Data",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "enum",
+                "targetField": "status"
+              },
+              {
+                "destinationType": "time",
+                "targetField": "time"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 10
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 10000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 1,
+      "options": {
+        "displayMode": "lcd",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "limit": 1000,
+          "values": false
+        },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "work_time_total{job=\"some_talend_job\", instance=~\"$job_instance\", run_id=\"$run_id\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{component}} Total",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Duration : $job_instance",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              " Total": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "__name__": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "component": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "context": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "job": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "pid": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "prog": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "project": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "run_id": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "status": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              },
+              "tDBConnection_1 Total": {
+                "aggregations": []
+              },
+              "tDBOutput_1 Total": {
+                "aggregations": []
+              },
+              "tFileInputDelimited_1 Total": {
+                "aggregations": []
+              },
+              "time": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              },
+              "version": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "Time",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "__name__",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "component",
+                "handlerKey": "field.name"
+              },
+              {
+                "fieldName": "prog",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "context",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "instance",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "job",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "pid",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "project",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "run_id",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "time (last)",
+                "handlerKey": "__ignore"
+              },
+              {
+                "fieldName": "Value (sum)",
+                "handlerKey": "field.value"
+              },
+              {
+                "fieldName": "status (last)",
+                "handlerKey": "mappings.color"
+              }
+            ]
+          }
+        }
+      ],
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 10000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 10,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "colorByField": "status (last)",
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xField": "component",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "work_time_total{job=\"some_talend_job\", instance=~\"$job_instance\", run_id=\"$run_id\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{component}} Total",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Duration : $job_instance",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              " Total": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "__name__": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "component": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "context": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "job": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "pid": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "prog": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "project": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "run_id": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "status": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              },
+              "tDBConnection_1 Total": {
+                "aggregations": []
+              },
+              "tDBOutput_1 Total": {
+                "aggregations": []
+              },
+              "tFileInputDelimited_1 Total": {
+                "aggregations": []
+              },
+              "time": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              },
+              "version": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "type": "barchart"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(work_time_total,run_id)",
+        "description": "uniquly identify the run",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Airflow Run Identifier",
+        "multi": false,
+        "name": "run_id",
+        "options": [],
+        "query": {
+          "query": "label_values(work_time_total,run_id)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 2,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(work_time_total{run_id=\"$run_id\"},instance)",
+        "description": "The job instance ; example : load in dw , ods_hello_work",
+        "hide": 0,
+        "includeAll": true,
+        "label": "job_instance",
+        "multi": true,
+        "name": "job_instance",
+        "options": [],
+        "query": {
+          "query": "label_values(work_time_total{run_id=\"$run_id\"},instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "TalendJobsETL",
+  "uid": "a9edff97-0bfe-47c1-9062-602a0d0f4706",
+  "version": 40,
+  "weekStart": ""
+}

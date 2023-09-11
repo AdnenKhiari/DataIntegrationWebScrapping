@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+
+    # links:
+    #   - cadvisor:cadvisor
+    #   - alertmanager:alertmanager
+    # depends_on:
+    #   - cadvisor
+
+  node-exporter:
+    image: prom/node-exporter
+    command:
+      - "--web.listen-address=:9100"
+      - "--collector.filesystem.ignored-mount-points='^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'"
+    ports:
+      - 9100:9100
+    restart: always
+    deploy:
+      mode: global
+
+  alertmanager:
+    image: prom/alertmanager
+    restart: always
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 9586:8080
+    restart: always
+    deploy:
+      mode: global
+  
+  grafana:
+    image: grafana/grafana
+    user: 'root'
+    restart: always
+    environment:
+      GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource'
+    volumes:
+      - ./grafana/data/:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    ports:
+      - 4003:3000
+
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    user: "root"
+    volumes:
+      - ./prometheus/etc:/etc/prometheus/
+      - ./prometheus/data/:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=1y'
+    ports:
+      - 9090:9090
+
+  pushgateway:
+    image: prom/pushgateway
+    container_name: pushgateway
+    restart: unless-stopped
+    expose:
+      - 9091:9091
+    ports:
+      - "9091:9091"
+
+    labels:
+      org.label-schema.group: "monitoring"
+
+  statsd-exporter:
+    image: prom/statsd-exporter
+    container_name: airflow-statsd-exporter
+    command: "--statsd.listen-udp=:8125 --web.listen-address=:9102 --statsd.mapping-config=/tmp/statsd_mapping.yml"
+    ports:
+      - 8125:8125/udp
+    volumes:
+      - ./statsd/statsd_mapping.yml:/tmp/statsd_mapping.yml
+
+  # airflow-exporter:
+  #   image: bitnami/airflow-exporter
+  #   container_name: airflow-exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     - AIRFLOW_PROMETHEUS_LISTEN_ADDR=:9112
+  #     - AIRFLOW_PROMETHEUS_DATABASE_BACKEND=postgres
+  #     - AIRFLOW_PROMETHEUS_DATABASE_HOST=172.17.0.1
+  #     - AIRFLOW_PROMETHEUS_DATABASE_PORT=7806
+  #     - AIRFLOW_PROMETHEUS_DATABASE_USER=airflow
+  #     - AIRFLOW_PROMETHEUS_DATABASE_PASSWORD=airflow
+  #     - AIRFLOW_PROMETHEUS_DATABASE_NAME=airflow        

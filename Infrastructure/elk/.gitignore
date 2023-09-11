@@ -1,0 +1,8 @@
+*
+!.gitignore
+!logstash
+!*/**.conf
+!*/**.yml
+!.env
+!elk.yml
+!filebeat_data*

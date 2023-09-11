@@ -1,0 +1,5 @@
+*
+!airflow.yml
+!.gitignore
+!dags
+!dags/**.py

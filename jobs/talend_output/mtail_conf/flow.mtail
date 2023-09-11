@@ -1,0 +1,11 @@
+
+counter rows_total by instance,version,project,pid,context,label,time
+
+/^(?P<tts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2});(?P<pid>[^;]*);(?P<field2>[^;]*);(?P<field3>[^;]*);(?P<field4>[^;]*);(?P<project>[^;]*);(?P<job>[^;]*);(?P<field7>[^;]*);(?P<version>[^;]*);(?P<context>[^;]*);(?P<origin>[^;]*);(?P<label>[^;]*);(?P<count>[^;]*);(?P<reference>[^;]*).*/ {
+
+ 
+    rows_total[ $job, $version,$project,$pid, $context, $label,$tts] = int($count)
+    rows_total[ $job, $version,$project,$pid, $context, "source",$tts] = int($reference)
+
+}
+

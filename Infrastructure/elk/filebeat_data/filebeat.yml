@@ -1,0 +1,63 @@
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.image: airflow
+          config:
+            - type: container 
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              multiline.type: pattern
+              multiline.pattern: '(^\[)|(^%{IP})'
+              multiline.negate: true
+              multiline.match: after
+              tags: ["airflow_infra"]
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.image: selenium
+          config:
+            - type: container 
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              multiline.type: pattern
+              multiline.pattern: '(^\d{2}:\d{2}:\d{2}.\d{3})|(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})'
+              multiline.negate: true
+              multiline.match: after
+              tags: ["selenium_infra"]
+# OUT TO DATE FOR NOW 
+# still have issues to solve in grok parsing ! then simply throw the rest as it is with  minimal grok and config ILM ctout for index templates configure it only for etl_jobs and infra just ILM with day_month_year index and delete after 1 week 
+filebeat.inputs:
+- type: log
+  paths:
+    - /var/log/job_logs/*/*/*/*.log
+  multiline.type: pattern
+  multiline.pattern: '^\['
+  multiline.negate: true
+  multiline.match: after
+  tags: ["etl_jobs"]
+
+- type: log
+  paths:
+    - /var/log/job_logs/scheduler/*/*.log
+  multiline.type: pattern
+  multiline.pattern: '^\['
+  multiline.negate: true
+  multiline.match: after
+  tags: ["airflow_scheduler_logs","airflow_infra"]
+
+
+- type: log
+  paths:
+    - /var/log/job_logs/dag_processor_manager/*.log
+  multiline.type: pattern
+  multiline.pattern: '^\['
+  multiline.negate: true
+  multiline.match: after
+  tags: ["airflow_processor_logs","airflow_infra"]
+
+output.logstash:
+  hosts: ${LOGSTASH_HOSTS}

@@ -1,0 +1,27 @@
+filebeat.modules:
+- module: elasticsearch
+  server:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/*/*.log          # Plain text logs
+      - /var/log/elasticsearch/*/*_server.json  # JSON logs
+
+output.elasticsearch:
+  hosts: ["https://es01:9200"] 
+  username: "${ELASTIC_USER}"
+  password: "${ELASTIC_PASSWORD}"
+  ssl.certificate_authorities: ["${ssl.certificate_authorities}"]
+  index: "logs-elastic-etl"
+
+setup:
+  ilm:
+    enabled: true
+    policy_name: logs
+  template:
+    enabled: true
+    name: "logs-elastic-etl"
+    pattern: "logs-elastic-etl*"
+
+# output.logstash:
+#   hosts: ${LOGSTASH_HOSTS}
+

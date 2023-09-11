@@ -1,0 +1,4 @@
+/docker
+*.json
+.gitignore
+/__pycache__

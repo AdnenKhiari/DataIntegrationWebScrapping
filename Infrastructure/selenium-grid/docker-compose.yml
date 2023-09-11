@@ -1,0 +1,57 @@
+version: "3.3"
+services:
+  chrome:
+    image: selenium/node-chrome:4.10
+    shm_size: 1gb
+    depends_on:
+      - selenium-hub
+    networks:
+      sl-grid:
+    environment:
+    # 10.0.9.22
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_MAX_INSTANCES=1
+      - SE_NODE_SESSION_TIMEOUT=100
+    deploy:
+      mode: replicated
+      replicas: 4
+      placement:
+        constraints: [node.role == worker]
+
+  selenium-hub:
+    image: selenium/hub:4.10.0
+    hostname: selenium-hub
+    networks:
+      sl-grid:
+        # ipv4_address: 10.0.9.22
+        # aliases:
+        #   - selenium-hub
+    ports:
+      - target: 4442
+        published: 4442
+        protocol: tcp
+        mode: host
+      - target: 4443
+        published: 4443
+        protocol: tcp
+        mode: host
+      - target: 4444
+        published: 4444
+        protocol: tcp
+        mode: host
+      - target: 5555
+        published: 5555
+        protocol: tcp
+        mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+networks:
+  sl-grid:
+    # driver: overlay
+    # attachable: true

@@ -1,0 +1,62 @@
+global:
+  scrape_interval:     10s
+  evaluation_interval: 10s
+
+# rule_files:
+#    - ./alert-rules.yml
+# alerting:
+#   alertmanagers:
+#   - static_configs:
+#     - targets:
+#       # alertmanager:9093
+#       - alertmanager:9093
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: node
+    static_configs:
+      - targets: ['node-exporter:9100']
+  # - job_name: nginx-exporter
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9913']
+  # - job_name: postgres-exporter
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  # - job_name: statsd
+  #   static_configs:
+  #     - targets: ['host.docker.internal:9102']
+  #       labels:
+  #           airflow_id:  "airflow"
+  - job_name: push_gateway
+    scrape_interval: 5s
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+  - job_name: cadvisor
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'statsd-exporter'
+    static_configs:
+      - targets: ['statsd-exporter:9102']
+
+  # - job_name: 'airflow-operator-exporter'
+  #   scrape_interval: 5s
+  #   static_configs:
+  #     - targets: ['airflow-exporter:9112']
+
+  - job_name: 'scrapping-hello-work'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['172.17.0.1:9777']
+  - job_name: 'get-skills-from-jobs'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['172.17.0.1:9987']
+  - job_name: 'company-details-scrap'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['172.17.0.1:9988']

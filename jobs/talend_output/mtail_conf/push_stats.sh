@@ -1,0 +1,1 @@
+mtail -progs stats.mtail -logs "./logs/stats_file.log" -one_shot   --one_shot_format prometheus | curl -s --data-binary @- http://$PROM_GATEWAY_ENV_CONN/metrics/job/some_talend_job/run_id/$RUN_ID/instance/$APP_NAME && echo "Stats Pushed Succesfully"

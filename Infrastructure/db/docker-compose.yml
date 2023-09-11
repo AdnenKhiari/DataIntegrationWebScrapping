@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  db_service:
+    image: mcr.microsoft.com/mssql/server
+    ports:
+      - 1433:1433
+    environment:
+      SA_PASSWORD: "Adnen123456789!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./data:/var/opt/mssql/data
+      - ./log:/var/opt/mssql/log
+      - ./secrets:/var/opt/mssql/secrets

@@ -1,0 +1,12 @@
+groups:
+  - name: group-1
+    rules:
+    - alert: HighRequestLatency
+      expr: sum(up)  > 2
+      for: 2m
+      labels:
+        severity: xDD
+        criticity : nen
+      annotations:
+        summary: High request latency
+        description: dis is the description

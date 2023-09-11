@@ -1,0 +1,24 @@
+filebeat.modules:
+- module: mssql
+  log:
+    enabled: true
+    var.paths: ['/var/log/db_logs/errorlog*']
+
+output.elasticsearch:
+  hosts: ["https://es01:9200"] 
+  username: "${ELASTIC_USER}"
+  password: "${ELASTIC_PASSWORD}"
+  ssl.certificate_authorities: ["${ssl.certificate_authorities}"]
+  index: "logs-mssql-etl"
+
+setup:
+  ilm:
+    enabled: true
+    policy_name: logs
+  template:
+    enabled: true
+    name: "logs-mssql-etl"
+    pattern: "logs-mssql-etl*"
+
+# output.logstash:
+#   hosts: ${LOGSTASH_HOSTS}

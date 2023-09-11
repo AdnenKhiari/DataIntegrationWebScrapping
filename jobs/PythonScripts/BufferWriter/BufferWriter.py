@@ -14,26 +14,29 @@ class BufferWriter:
     data : list = None
     max_buffer_size : int = None
     path : str = None
+    subname : str = None
     append : bool = False
     counter = 0
-    def __init__(self,base_name: str,max_buffer_size : int = None,append : bool = False,folder_path : str = "./") -> None:
-        logger.add("./logs/writer_{time}.log",    
-            enqueue=True,
-            rotation="5 Mb",
-            retention="4 weeks",
-            encoding="utf-8",
-            backtrace=True,
-            diagnose=True)
+    def __init__(self,base_name: str,subname: str = None,max_buffer_size : int = None,append : bool = False,folder_path : str = "./") -> None:
+        # logger.add("./logs/writer_{time}.log",    
+        #     enqueue=True,
+        #     rotation="5 Mb",
+        #     retention="4 weeks",
+        #     encoding="utf-8",
+        #     backtrace=True,
+        #     diagnose=True)
         self.append = False
+        self.subname = subname
         self.folder_path = folder_path
         self.data = []
         if(max_buffer_size == None):
-            self.max_buffer_size = 200*1024*1024
+            self.max_buffer_size = 20000*1024*1024
         else:
             self.max_buffer_size = max_buffer_size
-        self.path = os.path.join(os.getcwd(),folder_path,base_name,str(pd.Timestamp.date(pd.Timestamp.now())),str(pd.Timestamp.time(pd.Timestamp.now())).replace(":","-"))
+        # self.path = os.path.join(os.getcwd(),folder_path,base_name,str(pd.Timestamp.date(pd.Timestamp.now())),str(pd.Timestamp.time(pd.Timestamp.now())).replace(":","-"))
+        self.path = os.path.join(os.getcwd(),folder_path,base_name)
         os.makedirs(self.path,exist_ok=True)
-        logger.success(f"Output available at {self.path}")
+        logger.info(f"Output available at {self.path}")
         atexit.register(on_exit(self))
     def add(self,row):
         self.data.append(row)
@@ -41,10 +44,9 @@ class BufferWriter:
         if(self.max_buffer_size != None and sys.getsizeof(self.data) >= self.max_buffer_size):
             self.writeToDisk(newFile=True)
 
-    
     def clear(self):
         logger.debug(f"Clearing buffer")
-        self.data = [] 
+        self.data.clear()
     
     def size(self):
         return len(self.data)
@@ -53,11 +55,13 @@ class BufferWriter:
         nm = self.path+"/data"
         if not self.append or newFile:
             self.counter += 1
+        if(self.subname):
+            nm += self.subname
         nm += "_"+str(self.counter)
         header = os.path.exists(nm)
-        logger.debug(f"Writing Buffer to : {nm}")
-        pd.DataFrame(self.data).to_csv(nm+".csv",mode="a" if self.append else "w",header=not header,index=False)
-        self.data = []
+        logger.debug(f"Writing Buffer to : {nm}  with {len(self.data)} ")
+        pd.DataFrame(self.data).to_csv(nm+".csv",mode="a" if self.append else "w",header=not header,index=False,encoding="utf-8")
+        self.data.clear()
         logger.success(f"Data saved to : {nm}")
 
     

@@ -1,0 +1,27 @@
+FROM golang:alpine AS builder
+RUN apk add --update git make
+RUN git clone https://github.com/google/mtail.git /mtailsrc
+WORKDIR /mtailsrc
+RUN  make depclean && make install_deps && PREFIX=/go make STATIC=y -B install
+
+FROM eclipse-temurin:11-jre-alpine
+COPY --from=builder /go/bin/mtail /usr/bin/mtail
+RUN apk add curl
+
+# copy src files 
+RUN mkdir /app
+RUN mkdir /app/java
+COPY mtail_conf/  /app/java
+
+WORKDIR /app/java
+ARG APP_NAME
+ARG src="./Job Designs/${APP_NAME}"
+COPY ${src} ./
+COPY run.sh ./run.sh
+
+
+#configure the scripts
+USER root
+RUN chmod +x ./*.sh
+ENV APP_NAME=${APP_NAME}
+CMD ["sh","-c","./run.sh $APP_NAME"]

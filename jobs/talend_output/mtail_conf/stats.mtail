@@ -1,0 +1,11 @@
+
+counter work_time_total by instance,version,project,pid,context,component,time,status
+
+/^(?P<tts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2});(?P<pid>[^;]*);(?P<field2>[^;]*);(?P<field3>[^;]*);(?P<field4>[^;]*);(?P<project>[^;]*);(?P<job>[^;]*);(?P<field7>[^;]*);(?P<version>[^;]*);(?P<context>[^;]*);(?P<origin>[^;]*);(?P<phase>[^;]*);(?P<status>[^;]*);(?P<duration>[^;]*)$/ {
+
+  $phase == "end" {
+    work_time_total[$job, $version,$project,$pid, $context, $origin,$tts, $status] += int($duration)
+  }
+
+}
+

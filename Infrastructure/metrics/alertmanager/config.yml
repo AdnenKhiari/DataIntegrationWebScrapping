@@ -1,0 +1,14 @@
+route:
+  receiver: 'mail'
+  repeat_interval: 1m
+  group_by: [ alertname ]
+
+
+receivers:
+  - name: 'mail'
+    email_configs:
+      - smarthost: 'sandbox.smtp.mailtrap.io:25'
+        auth_username: '339ea16058f3ee'
+        auth_password: "042b103e263497"
+        from: 'your_mail@gmail.com'
+        to: 'aymenkhiari484@gmail.com'
