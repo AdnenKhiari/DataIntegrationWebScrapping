@@ -1,9 +1,9 @@
 # Infrastructure And Tools
-[Selenium Grid](#selenium-grid)
-[ELK Stack](#elk-stack)
-[Prometheus And Grafana](#prometheus-and-grafana)
-[Apache Airflow](#apache-airflow)
-[Talend Open Studio](#talend-open-studio)
+- [Selenium Grid](#selenium-grid)
+- [ELK Stack](#elk-stack)
+- [Prometheus And Grafana](#prometheus-and-grafana)
+- [Apache Airflow](#apache-airflow)
+- [Talend Open Studio](#talend-open-studio)
 
 
 # Selenium Grid
